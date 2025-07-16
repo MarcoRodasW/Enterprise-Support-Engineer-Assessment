@@ -1,0 +1,5 @@
+[INFO] 2023-10-05T14:22:01Z - API call: /api/export (key_ABC123) - 200 OK
+[INFO] 2023-10-05T14:22:03Z - API call: /api/export (key_ABC123) - 200 OK
+[WARN] 2023-10-05T14:22:05Z - Rate limit exceeded: key_ABC123 (5/5)
+[ERROR] 2023-10-05T14:22:05Z - API call: /api/export (key_ABC123) - 429 Too Many Requests
+[INFO] 2023-10-05T14:27:01Z - API call: /api/export (key_ABC123) - 429 Too Many Requests  # Still blocked after 5 minutes

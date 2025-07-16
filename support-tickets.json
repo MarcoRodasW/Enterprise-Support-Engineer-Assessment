@@ -1,0 +1,16 @@
+[
+  {
+    "id": "TICKET-001",
+    "title": "Rate Limiting Not Resetting",
+    "description": "Users report permanent 429 errors after initial requests. Our documentation states limits should reset daily, but this isn't occurring.",
+    "repro_steps": "1. Make 5+ quick calls to /api/export\n2. Wait 5 minutes\n3. Make another call\nExpected: Success\nActual: Still 429",
+    "severity": "High"
+  },
+  {
+    "id": "TICKET-002",
+    "title": "GDPR Compliance Issue",
+    "description": "Security audit found full API keys exposed in /api/audit responses. This violates our data protection standards.",
+    "repro_steps": "1. Call GET /api/audit\n2. Inspect response body\nExpected: Masked keys\nActual: Full keys visible",
+    "severity": "Critical"
+  }
+]
