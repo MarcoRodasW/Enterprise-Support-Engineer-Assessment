@@ -92,39 +92,42 @@ func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		now := time.Now().UTC()
-		if now.Hour() == 0 && now.Minute() == 0 && now.Second() < 5 {
-			_, err = db.Exec("UPDATE api_keys SET calls_made = 0")
-			if err != nil {
-				logError(r, "Rate reset failed: "+err.Error(), 0)
-			}
-		}
+	       var callsMade, rateLimit int
+	       var lastReset time.Time
+	       err = db.QueryRow(`
+		       SELECT calls_made, rate_limit, last_reset
+		       FROM api_keys
+		       WHERE api_key = ?
+	       `, apiKey).Scan(&callsMade, &rateLimit, &lastReset)
+	       if err != nil {
+		       logError(r, "Rate limit check failed: "+err.Error(), 0)
+	       }
 
-		var callsMade, rateLimit int
-		err = db.QueryRow(`
-			SELECT calls_made, rate_limit 
-			FROM api_keys 
-			WHERE api_key = ?
-		`, apiKey).Scan(&callsMade, &rateLimit)
-		if err != nil {
-			logError(r, "Rate limit check failed: "+err.Error(), 0)
-		}
-		if callsMade >= rateLimit {
-			http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
-			return
-		}
+	       now := time.Now().UTC()
+	       if now.Sub(lastReset) >= 24*time.Hour {
+		       _, err = db.Exec(`UPDATE api_keys SET calls_made = 0, last_reset = ? WHERE api_key = ?`, now, apiKey)
+		       if err != nil {
+			       logError(r, "Rate reset failed: "+err.Error(), 0)
+		       }
+		       callsMade = 0
+	       }
 
-		_, err = db.Exec(`
-			UPDATE api_keys 
-			SET calls_made = calls_made + 1 
-			WHERE api_key = ?
-		`, apiKey)
-		if err != nil {
-			logError(r, "Rate limit update failed: "+err.Error(), 0)
-		}
+	       if callsMade >= rateLimit {
+		       http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+		       return
+	       }
 
-		ctx := context.WithValue(r.Context(), "userID", userID)
-		next.ServeHTTP(w, r.WithContext(ctx))
+	       _, err = db.Exec(`
+		       UPDATE api_keys 
+		       SET calls_made = calls_made + 1 
+		       WHERE api_key = ?
+	       `, apiKey)
+	       if err != nil {
+		       logError(r, "Rate limit update failed: "+err.Error(), 0)
+	       }
+
+	       ctx := context.WithValue(r.Context(), "userID", userID)
+	       next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
 
