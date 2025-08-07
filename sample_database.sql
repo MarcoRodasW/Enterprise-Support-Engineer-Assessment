@@ -46,13 +46,12 @@ INSERT INTO audit_logs (api_key, endpoint, response_code, response_time_ms, erro
 ('key_ABC123', '/api/export', 200, 110, NULL),
 ('key_DEF456', '/api/audit', 200, 85, NULL);
 
--- FIXME 3: Create GDPR-compliant masked view
--- CREATE VIEW masked_audit_logs AS
--- SELECT 
---   id,
---   CONCAT(LEFT(api_key, 6), '...') AS masked_key,
---   endpoint,
---   response_code,
---   response_time_ms,
---   timestamp
--- FROM audit_logs;
+CREATE OR REPLACE VIEW masked_audit_logs AS
+SELECT 
+  id,
+  CONCAT(LEFT(api_key, 6), '...') AS masked_key,
+  endpoint,
+  response_code,
+  response_time_ms,
+  timestamp
+FROM audit_logs;
