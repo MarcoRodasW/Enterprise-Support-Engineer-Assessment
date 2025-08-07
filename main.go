@@ -23,7 +23,7 @@ func main() {
 	}
 	dbPass := os.Getenv("DB_PASS")
 	if dbPass == "" {
-		dbPass = "password"
+		dbPass = "root"
 	}
 	dbHost := os.Getenv("DB_HOST")
 	if dbHost == "" {
@@ -197,34 +197,34 @@ func handleAuditLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := db.Query(`SELECT * FROM audit_logs ORDER BY timestamp DESC`)
-	if err != nil {
-		logError(r, "Audit log query failed: "+err.Error(), 0)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
+       rows, err := db.Query(`SELECT id, masked_key, endpoint, response_code, response_time_ms, timestamp FROM masked_audit_logs ORDER BY timestamp DESC`)
+       if err != nil {
+	       logError(r, "Audit log query failed: "+err.Error(), 0)
+	       http.Error(w, "Internal server error", http.StatusInternalServerError)
+	       return
+       }
+       defer rows.Close()
 
-	type AuditLog struct {
-		ID             int       `json:"id"`
-		APIKey         string    `json:"api_key"`
-		Endpoint       string    `json:"endpoint"`
-		ResponseCode   int       `json:"response_code"`
-		ResponseTimeMs int       `json:"response_time_ms"`
-		Timestamp      time.Time `json:"timestamp"`
-	}
+       type MaskedAuditLog struct {
+	       ID             int       `json:"id"`
+	       MaskedKey      string    `json:"api_key"`
+	       Endpoint       string    `json:"endpoint"`
+	       ResponseCode   int       `json:"response_code"`
+	       ResponseTimeMs int       `json:"response_time_ms"`
+	       Timestamp      time.Time `json:"timestamp"`
+       }
 
-	var logs []AuditLog
-	for rows.Next() {
-		var l AuditLog
-		if err := rows.Scan(&l.ID, &l.APIKey, &l.Endpoint, &l.ResponseCode, &l.ResponseTimeMs, &l.Timestamp, new(sql.NullString)); err != nil {
-			logError(r, "Log scan failed: "+err.Error(), 0)
-			continue
-		}
-		logs = append(logs, l)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(logs)
+       var logs []MaskedAuditLog
+       for rows.Next() {
+	       var l MaskedAuditLog
+	       if err := rows.Scan(&l.ID, &l.MaskedKey, &l.Endpoint, &l.ResponseCode, &l.ResponseTimeMs, &l.Timestamp); err != nil {
+		       logError(r, "Log scan failed: "+err.Error(), 0)
+		       continue
+	       }
+	       logs = append(logs, l)
+       }
+       w.Header().Set("Content-Type", "application/json")
+       json.NewEncoder(w).Encode(logs)
 }
 
 func handleServices(w http.ResponseWriter, r *http.Request) {
