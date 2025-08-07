@@ -18,7 +18,8 @@ CREATE TABLE api_keys (
   rate_limit INT DEFAULT 100,
   calls_made INT DEFAULT 0,
   is_valid BOOLEAN DEFAULT 1,
-  expires_at DATE
+  expires_at DATE,
+  last_reset DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE audit_logs (
