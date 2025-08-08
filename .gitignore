@@ -33,3 +33,5 @@ go.work.sum
 
 # macOS metadata
 .DS_Store
+
+node_modules/

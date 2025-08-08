@@ -1,0 +1,29 @@
+[
+  {
+    "endpoint": "export",
+    "url": "http://localhost:8080/api/export",
+    "httpCode": 403,
+    "status": "error",
+    "latency": 718,
+    "error": "Request failed with status code 403",
+    "timestamp": "2025-08-08T05:58:19.121Z"
+  },
+  {
+    "endpoint": "audit",
+    "url": "http://localhost:8080/api/audit",
+    "httpCode": 200,
+    "status": "healthy",
+    "latency": 24,
+    "error": null,
+    "timestamp": "2025-08-08T05:58:18.455Z"
+  },
+  {
+    "endpoint": "health",
+    "url": "http://localhost:8080/health",
+    "httpCode": 200,
+    "status": "healthy",
+    "latency": 13,
+    "error": null,
+    "timestamp": "2025-08-08T05:58:18.447Z"
+  }
+]
